@@ -9,9 +9,10 @@
   <body>
     <input type="file" accept=".xml" id="fileinput" />
     <button id="start">Next</button>
+    <br /><br /><br />
+    <div id="mapper"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
     <script>
-
       const prettifyXml = function (sourceXml) {
         var xmlDoc = new DOMParser().parseFromString(
           sourceXml,
@@ -41,10 +42,66 @@
         return resultXml;
       };
 
+      const createInputBlock = (entity) => {
+        const div = document.createElement("div");
+        div.innerHTML = `<br/> <h4>${entity.name}</h4> <br/>`;
+
+        const container = document.createElement("div");
+
+        div.appendChild(container);
+
+        const delGroup = (group) => {
+          entity.groups = entity.groups.filter((x) => x !== group);
+        };
+
+        const createInputs = () =>
+          entity.groups.map((x) => {
+            const inputTemp = document.createElement("input");
+            inputTemp.value = x;
+            inputTemp.onchange = () => {
+              const index = entity.groups.indexOf(x);
+              if (index !== -1) {
+                entity.groups[index] = inputTemp.value;
+              }
+            };
+            const delButton = document.createElement("button");
+            delButton.innerText = "Delete";
+            delButton.onclick = () => {
+              delGroup(x);
+              render();
+            };
+
+            const res = document.createElement("div");
+            res.appendChild(inputTemp);
+            res.appendChild(delButton);
+            return res;
+          });
+
+        const render = () => {
+          const inputs = createInputs();
+          container.innerText = "";
+          for (const inputTemp of inputs) {
+            container.appendChild(inputTemp);
+            container.appendChild(document.createElement("br"));
+          }
+          const addButton = document.createElement("button");
+          addButton.innerText = "Add new";
+          addButton.onclick = () => {
+            entity.groups = [...entity.groups, ""];
+            render();
+          };
+          container.appendChild(addButton);
+        };
+
+        render();
+        return div;
+      };
+
       const start = document.getElementById("start");
       const input = document.getElementById("fileinput");
+      const mapper = document.getElementById("mapper");
 
-       start.onclick = () => {
+      start.onclick = () => {
         const file = input.files[0];
         var reader = new FileReader();
         reader.readAsText(file, "UTF-8");
@@ -56,25 +113,26 @@
 
           const oldNodes = Array.from(xmlDoc.getElementsByTagName("Course"));
 
-          const newNodes = oldNodes
+          const entities = oldNodes
             .map((x) => ({
               course: x,
-              name: x.getElementsByTagName("CourseName")[0],
+              name: x.getElementsByTagName("CourseName")[0].textContent,
             }))
             .map((x) => ({
               ...x,
-              groups: x.name.textContent
-                .split(";")
-                .map((y) =>
-                  y
-                    .trim()
-                    .replace("Ж", "W")
-                    .replace("Ч", "M")
-                    .replace("А", "A")
-                    .replace("Е", "E")
-                ),
-            }))
-            .flatMap((x) =>
+              groups: x.name.split(";").map((y) => y.trim()),
+            }));
+
+          const blocks = entities.map(createInputBlock);
+          mapper.append(...blocks);
+
+          const finish = document.createElement("button");
+          finish.innerText = "Finish";
+
+          mapper.prepend(finish);
+
+          finish.onclick = () => {
+            const newNodes = entities.flatMap((x) =>
               x.groups.map((y) => {
                 const element = x.course.cloneNode(true);
                 element.getElementsByTagName("CourseName")[0].textContent = y;
@@ -82,24 +140,25 @@
               })
             );
 
-          for (const node of oldNodes) {
-            xmlDoc.documentElement.removeChild(node);
-          }
-
-          for (const node of newNodes) {
-            xmlDoc.documentElement.appendChild(node);
-          }
-
-          var blob = new Blob(
-            [prettifyXml(new XMLSerializer().serializeToString(xmlDoc))],
-            {
-              type: "text/xml",
+            for (const node of Array.from(
+              xmlDoc.getElementsByTagName("Course")
+            )) {
+              xmlDoc.documentElement.removeChild(node);
             }
-          );
 
-            console.log(URL.createObjectURL(blob));
+            for (const node of newNodes) {
+              xmlDoc.documentElement.appendChild(node);
+            }
 
-          saveAs(blob, "result.xml");
+            var blob = new Blob(
+              [prettifyXml(new XMLSerializer().serializeToString(xmlDoc))],
+              {
+                type: "text/xml",
+              }
+            );
+
+            saveAs(blob, `${file.name.replace(/\.[^/.]+$/, "")}_updated.xml`);
+          };
         };
       };
     </script>
