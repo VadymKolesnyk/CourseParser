@@ -1,0 +1,109 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  padding: 20px;
+  font-family: Calibri;
+}
+
+#mapper {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  margin: 10px 0;
+}
+
+.input-block {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 5px;
+  align-items: start;
+  background: gainsboro;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.input-container {
+  display: grid;
+  gap: 5px;
+}
+
+.input-line {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: 1fr 100px;
+}
+
+.input-group-name {
+  font-weight: bold;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  border: solid 1px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.delete {
+  color: red;
+  border-color: red;
+  background-color: #fff0f0;
+}
+
+.add {
+  color: green;
+  border-color: green;
+  background-color: #f0fff0;
+}
+
+.drop-container {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px dashed #555;
+  color: #444;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
+}
+
+.drop-container:hover,
+.drag-active {
+  background: #eee;
+  border-color: #111;
+  border-style: solid;
+}
+
+.drop-container:hover .drop-title {
+  color: #222;
+}
+
+.drop-title {
+  color: #444;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  transition: color 0.2s ease-in-out;
+}
+
+.finish-block {
+  display: flex;
+  justify-content: center;
+}
+
+.finish {
+  border-color: blue;
+  color: blue;
+  background: #f0f0ff;
+  font-size: 1.5rem;
+  padding: 10px;
+  border-radius: 30px;
+  width: 200px;
+}
