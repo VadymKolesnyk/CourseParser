@@ -14,6 +14,15 @@ const xsltDoc = new DOMParser().parseFromString(
   'application/xml'
 );
 
+const colors = [
+  '#dcdcdc',
+  '#d9c0c0',
+  '#c0d9c1',
+  '#c0d9d5',
+  '#c0c1d9',
+  '#d1c0d9',
+]
+
 // Functions
 
 const prettifyXml = (xmlDoc) => {
@@ -32,14 +41,19 @@ const saveXmlFile = (xmlDoc, filename) => {
 
 const createInputBlock = (entity) => {
   const div = document.createElement('div');
+  div.style.backgroundColor = colors[entity.order.controls[0] % colors.length];
   div.classList.add('input-block');
   div.innerHTML = `<div class="input-group-name">${entity.name}</div>`;
 
   const container = document.createElement('div');
   container.classList.add('input-container');
 
-  div.appendChild(container);
+  const order = document.createElement('div');
+  order.classList.add('input-order');
+  order.innerText = entity.order.start + ' ' + entity.order.controls.join(' ') + ' ' + entity.order.finish;
 
+  div.appendChild(container);
+  div.appendChild(order);
   const delGroup = (group) => {
     entity.groups = entity.groups.filter((x) => x !== group);
   };
@@ -142,7 +156,19 @@ const start = () => {
       .map((x) => ({
         ...x,
         groups: x.name.split(/;|,|\./).map((y) => y.trim()),
-      }));
+        order: {
+          start: x.course.getElementsByTagName('StartPointCode')[0]?.textContent ?? '',
+          controls: Array.from(x.course.getElementsByTagName('CourseControl'))
+            .map((y) => ({
+              sequence: y.getElementsByTagName('Sequence')[0]?.textContent ?? '',
+              controlCode: y.getElementsByTagName('ControlCode')[0]?.textContent ?? '',
+            }))
+            .sort((a, b) => a.sequence - b.sequence)
+            .map((x) => x.controlCode),
+          finish: x.course.getElementsByTagName('FinishPointCode')[0]?.textContent ?? '',
+        },
+      }))
+      .sort((a, b) => a.order.controls[0] - b.order.controls[0]);
 
     const blocks = entities.map(createInputBlock);
     mapper.innerText = '';
