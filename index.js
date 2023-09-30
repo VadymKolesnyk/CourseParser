@@ -69,6 +69,7 @@ const createInputBlock = (entity) => {
         }
       };
       const delButton = document.createElement('button');
+      delButton.tabIndex = '-1';
       delButton.innerText = 'Delete';
       delButton.classList.add('delete', 'button');
       delButton.onclick = () => {
@@ -90,6 +91,7 @@ const createInputBlock = (entity) => {
       container.appendChild(inputTemp);
     }
     const addButton = document.createElement('button');
+    addButton.tabIndex = '-1';
     addButton.innerText = 'Add new';
     addButton.classList.add('add', 'button');
     addButton.onclick = () => {
@@ -155,7 +157,7 @@ const start = () => {
       }))
       .map((x) => ({
         ...x,
-        groups: x.name.split(/;|,|\./).map((y) => y.trim()),
+        groups: x.name.split(/;|,|\./).map((y) => y.replace('W', 'Ж').replace('M', 'Ч').replace('E', 'Е').replace('A', 'А').trim()),
         order: {
           start: x.course.getElementsByTagName('StartPointCode')[0]?.textContent ?? '',
           controls: Array.from(x.course.getElementsByTagName('CourseControl'))
@@ -184,7 +186,7 @@ const start = () => {
     const newNodes = entities.flatMap((x) =>
       x.groups.map((y) => {
         const element = x.course.cloneNode(true);
-        element.getElementsByTagName('CourseName')[0].textContent = y;
+        element.getElementsByTagName('CourseName')[0].textContent = ` ${y} `;
         return element;
       })
     );
